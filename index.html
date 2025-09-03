@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iPAS AI 題庫 851</title>
+  <style>
+    body {
+      font-family: "Microsoft JhengHei", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f8f9fa;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      background-color: #fff;
+      z-index: 100;
+      padding: 10px;
+      border-bottom: 2px solid #ccc;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      margin: 0 10px 0 0;
+      color: #333;
+    }
+
+    .stats {
+      font-weight: bold;
+      margin: 5px 0;
+      color: #006600;
+      flex: 1 1 100%;
+    }
+
+    .header-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 5px;
+    }
+
+    button {
+      padding: 8px 15px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: white;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .question {
+      margin: 15px;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .question p {
+      margin: 0 0 10px;
+      font-weight: bold;
+    }
+
+    .options button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      margin: 5px 0;
+      padding: 10px;
+      font-size: 14px;
+      background-color: #e9ecef;
+      color: #000;
+    }
+
+    .correct {
+      background-color: #28a745 !important;
+      color: #fff !important;
+      font-weight: bold;
+    }
+
+    .wrong {
+      background-color: #dc3545 !important;
+      color: #fff !important;
+      font-weight: bold;
+    }
+
+    .answer {
+      margin-top: 8px;
+      font-weight: bold;
+      color: blue;
+    }
+
+    /* 手機排版調整 */
+    @media (max-width: 600px) {
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .header h1 {
+        font-size: 18px;
+        margin-bottom: 5px;
+      }
+      .header-buttons {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      button {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>iPAS AI 題庫 851</h1>
+    <div class="stats" id="scoreboard">答對：0 題　答錯：0 題</div>
+    <div class="header-buttons">
+      <button id="showAllAnswers">顯示所有答案</button>
+      <button id="restartButton">重新出題</button>
+    </div>
+  </div>
+
+  <div id="quiz"></div>
+
+  <script>
+    let correctCount = 0;
+    let wrongCount = 0;
+    let questionsData = [];
+
+    // 載入 JSON 題庫
+    fetch("851questions.json")
+      .then(response => response.json())
+      .then(data => {
+        questionsData = data;
+        renderQuiz(pickRandom(data, 50));
+      })
+      .catch(error => {
+        document.getElementById("quiz").innerHTML =
+          `<p style="color:red;">載入題庫失敗：${error}</p>`;
+      });
+
+    // 隨機抽題
+    function pickRandom(arr, count) {
+      const shuffled = [...arr];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled.slice(0, count);
+    }
+
+    function renderQuiz(questions) {
+      const quizDiv = document.getElementById("quiz");
+      quizDiv.innerHTML = "";
+      correctCount = 0;
+      wrongCount = 0;
+      updateScoreboard();
+
+      questions.forEach((q, idx) => {
+        const qDiv = document.createElement("div");
+        qDiv.className = "question";
+        qDiv.dataset.answer = q.answer;
+
+        const title = document.createElement("p");
+        title.textContent = `${idx+1}. ${q.question}`;
+        qDiv.appendChild(title);
+
+        const optionsDiv = document.createElement("div");
+        optionsDiv.className = "options";
+
+        for (const [key, text] of Object.entries(q.options)) {
+          const btn = document.createElement("button");
+          btn.textContent = `(${key}) ${text}`;
+          btn.onclick = () => {
+            if (btn.disabled) return;
+            if (key === q.answer) {
+              btn.classList.add("correct");
+              correctCount++;
+            } else {
+              btn.classList.add("wrong");
+              wrongCount++;
+            }
+            updateScoreboard();
+            // 顯示正解
+            if (!qDiv.querySelector(".answer")) {
+              const ans = document.createElement("div");
+              ans.className = "answer";
+              ans.textContent = `正確答案：(${q.answer}) ${q.options[q.answer]}`;
+              qDiv.appendChild(ans);
+            }
+            [...optionsDiv.querySelectorAll("button")].forEach(b => b.disabled = true);
+          };
+          optionsDiv.appendChild(btn);
+        }
+
+        qDiv.appendChild(optionsDiv);
+        quizDiv.appendChild(qDiv);
+      });
+    }
+
+    function updateScoreboard() {
+      document.getElementById("scoreboard").textContent =
+        `答對：${correctCount} 題　答錯：${wrongCount} 題`;
+    }
+
+    // 顯示所有答案
+    document.getElementById("showAllAnswers").addEventListener("click", () => {
+      document.querySelectorAll(".question").forEach(qDiv => {
+        if (!qDiv.querySelector(".answer")) {
+          const ans = document.createElement("div");
+          const answerKey = qDiv.dataset.answer;
+          const idx = [...qDiv.parentNode.children].indexOf(qDiv);
+          const q = questionsData[idx];
+          ans.className = "answer";
+          ans.textContent = `正確答案：(${answerKey}) ${q.options[answerKey]}`;
+          qDiv.appendChild(ans);
+        }
+        qDiv.querySelectorAll("button").forEach(b => b.disabled = true);
+      });
+    });
+
+    // 重新出題
+    document.getElementById("restartButton").addEventListener("click", () => {
+      renderQuiz(pickRandom(questionsData, 50));
+    });
+  </script>
+</body>
+</html>
