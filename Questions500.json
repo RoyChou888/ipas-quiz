@@ -4111,5 +4111,6 @@
             "D": "LLaMA"
         },
         "answer": "C",
-        "analysis": "TAIDE（Taiwan AI Dialog Engine）是台灣國家科學及技術委員會（NSTC）主導的本土 LLM 計畫，強調在地化優化與本地端部署。 
+        "analysis": "TAIDE（Taiwan AI Dialog Engine）是台灣國家科學及技術委員會（NSTC）主導的本土 LLM 計畫，強調在地化優化與本地端部署。"
+    }
 ]
