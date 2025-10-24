@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>iPAS AI 題庫 851</title>
+  <title>iPAS CCChen 模擬500題庫</title>
   <style>
     body {
       font-family: "Microsoft JhengHei", sans-serif;
@@ -123,7 +123,7 @@
 </head>
 <body>
   <div class="header">
-    <h1>iPAS AI 題庫 851</h1>
+    <h1>iPAS CCChen 模擬500題庫</h1>
     <div class="stats" id="scoreboard">答對：0 題　答錯：0 題</div>
     <div class="header-buttons">
       <button id="showAllAnswers">顯示所有答案</button>
@@ -137,9 +137,10 @@
     let correctCount = 0;
     let wrongCount = 0;
     let questionsData = [];
+    let currentQuestions = [];
 
     // 載入 JSON 題庫
-    fetch("851questions.json")
+    fetch("Questions500.json")
       .then(response => response.json())
       .then(data => {
         questionsData = data;
@@ -165,6 +166,7 @@
       quizDiv.innerHTML = "";
       correctCount = 0;
       wrongCount = 0;
+      currentQuestions = questions;
       updateScoreboard();
 
       questions.forEach((q, idx) => {
@@ -192,11 +194,12 @@
               wrongCount++;
             }
             updateScoreboard();
-            // 顯示正解
+            // 顯示正解與解析
             if (!qDiv.querySelector(".answer")) {
               const ans = document.createElement("div");
               ans.className = "answer";
-              ans.textContent = `正確答案：(${q.answer}) ${q.options[q.answer]}`;
+              const analysisText = q.analysis ? `\n解析：${q.analysis}` : "";
+              ans.textContent = `正確答案：(${q.answer}) ${q.options[q.answer]}${analysisText}`;
               qDiv.appendChild(ans);
             }
             [...optionsDiv.querySelectorAll("button")].forEach(b => b.disabled = true);
@@ -221,9 +224,10 @@
           const ans = document.createElement("div");
           const answerKey = qDiv.dataset.answer;
           const idx = [...qDiv.parentNode.children].indexOf(qDiv);
-          const q = questionsData[idx];
+          const q = currentQuestions[idx];
           ans.className = "answer";
-          ans.textContent = `正確答案：(${answerKey}) ${q.options[answerKey]}`;
+          const analysisText = q.analysis ? `\n解析：${q.analysis}` : "";
+          ans.textContent = `正確答案：(${answerKey}) ${q.options[answerKey]}${analysisText}`;
           qDiv.appendChild(ans);
         }
         qDiv.querySelectorAll("button").forEach(b => b.disabled = true);
